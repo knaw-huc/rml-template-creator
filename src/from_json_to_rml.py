@@ -5,36 +5,6 @@ import re
 import sys
 import json
 
-
-example = '''
-{
-  "@context": {
-    "rr": "http://www.w3.org/ns/r2rml#",
-    "rml": "http://semweb.mmlab.be/ns/rml#",
-    "tim": "http://timbuctoo.huygens.knaw.nl/mapping#"
-  },
-  "@graph": [
-    {
-    "@id": "http://timbuctoo.com/mappings/bia/knaw/Persons",
-      {
-        "rr:predicate": {
-          "@id": "http://schema.org/gender"
-        },
-        "rr:objectMap": {
-          "rr:column": "gender",
-          "rr:datatype": {
-            "@id": "http://www.w3.org/2001/XMLSchema#string"
-          },
-          "rr:termType": {
-            "@id": "rr:Literal"
-          }
-        }
-      }
-    }
-  ]
-}
-'''
-
 def stderr(text):
     sys.stderr.write("{}\n".format(text))
 
@@ -45,74 +15,93 @@ def end_prog(code=0):
 
  
 def arguments():
-    ap = argparse.ArgumentParser(description='Read headerline from excelfile make a standard mappingfile')
+    ap = argparse.ArgumentParser(description='Read mappingfile to make an rml-file')
     ap.add_argument('-o', '--outputfile',
                     help="outputfile",
-                    default = "rml_mapping.jsonnet")
+                    default = "rml_mapping.json")
     ap.add_argument('-m', '--mappingfile',
                     help="mappingfile (default = mapping.json)",
                     default = "mapping.json")
+    ap.add_argument('-d', '--dataset',
+                    help="dataset (default = test_sheet)",
+                    default = "test_sheet")
+    ap.add_argument('-r', '--rawcollectionuri',
+                    help="rawcollectionuri")
     args = vars(ap.parse_args())
     return args
 
- 
-if __name__ == "__main__":
+def start():
     stderr("start")
     stderr(datetime.today().strftime("%H:%M:%S"))
 
+def end():
+    stderr(datetime.today().strftime("%H:%M:%S"))
+    stderr("einde")
+ 
+if __name__ == "__main__":
+    start()
     args = arguments()
     inputfile = args['mappingfile']
     outputfile = args['outputfile']
+    rawcollectionuri= args['rawcollectionuri']
+    dataset = args['dataset']
 
-    mapping = {}
- 
     output = open(outputfile, "w", encoding='utf-8')
 
     json_input = open(inputfile)
     mapping_dict = json.load(json_input)
     mapping = mapping_dict['mapping']
-    
-    header = '''
-{
-  "@context": {
-    "rr": "http://www.w3.org/ns/r2rml#",
-    "rml": "http://semweb.mmlab.be/ns/rml#",
-    "tim": "http://timbuctoo.huygens.knaw.nl/mapping#"
-  },
-  "@graph": [
-'''
-    output.write(header)
 
-    first = True
-    for key in mapping['Mastersheet'].keys():
-        if not first:
-            output.write(',\n')
-        first = False
-        word = key
-        example = {
-          "rr:predicate": {
-            "@id": "http://schema.org/" + word
-          },
-          "rr:objectMap": {
-            "rr:column": word,
-            "rr:datatype": {
-              "@id": "http://www.w3.org/2001/XMLSchema#string"
-            },
-            "rr:termType": {
-              "@id": "rr:Literal"
+    result = {}
+    result['@context'] = {
+            "rr": "http://www.w3.org/ns/r2rml#",
+            "rml": "http://semweb.mmlab.be/ns/rml#",
+            "tim": "http://timbuctoo.huygens.knaw.nl/mapping#"
             }
-          }
-        }
-        output.write(json.dumps(example, sort_keys=False, indent=2))
+    result['@graph'] = []
 
-    footer = '''
-  ]
-}
-'''
-    output.write(footer)
+    teller = 0
+    for sheet in mapping.keys():
+        this_sheet = {}
+        resource = "http://timbuctoo.huygens.knaw.nl/v5/data/{0}/{1}/".format(dataset,sheet)
+        this_sheet['@id'] = resource
+
+        teller += 1
+        this_sheet['rml:logicalSource'] = {
+                "rml:source" : {
+                    "tim:rawCollectionUri" : {
+                        "@id" : rawcollectionuri + "{}".format(teller)
+                        },
+                    "tim:customField": []
+                    }
+                }
+        
+        this_sheet['rr:subjectMap'] = {}
+        this_sheet['rr:subjectMap']['rr:template'] = resource + "{persistant_id}"
+        this_sheet['rr:subjectMap']['rr:class'] =  { "@id": resource }
+        this_sheet['rr:predicateObjectMap'] = []
+
+        for key in mapping[sheet].keys():
+            this_key = {
+              "rr:predicate": {
+                "@id": "http://schema.org/" + key
+              },
+              "rr:objectMap": {
+                "rr:column": key,
+                "rr:datatype": {
+                  "@id": "http://www.w3.org/2001/XMLSchema#string"
+                },
+                "rr:termType": {
+                  "@id": "rr:Literal"
+                }
+              }
+            }
+            this_sheet['rr:predicateObjectMap'].append(this_key)
+        result['@graph'].append(this_sheet)
+
+    output.write(json.dumps(result, sort_keys=False, indent=2))
     output.close()
 
-    stderr(datetime.today().strftime("%H:%M:%S"))
-    stderr("einde")
+    end()
 
 
