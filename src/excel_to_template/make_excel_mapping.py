@@ -5,15 +5,32 @@ import re
 import sys
 import xlrd 
 import json
+import os
 
 
+class MakeBaseMapping:
 
-def xls_sheet(sheet, headerrownum=0):
-#    for inputfile in inputfiles:
-#        wb = xlrd.open_workbook(inputfile)
-#        for i in range(0, wb.nsheets):
-#            stderr("{}: {}".format(i, wb.sheet_by_index(i).name))
-#        sheet = wb.sheet_by_index(sheetnum) 
+    def __init__(self, inputfilename, mappingfile):
+        self.inputfile = inputfilename
+        self.mappingfile = mappingfile
+
+    def make_mapping(self):
+        headers = self.read_sheets()
+        mapping = { 'mapping': headers }
+        mapping['links'] = {}
+        mapping['combine'] = {}
+        with open(self.mappingfile,"w", encoding='utf-8') as outputfile:
+            outputfile.write(json.dumps(mapping, sort_keys=False, indent=4))
+
+    def read_sheets(self):
+        headers = {}
+        with xlrd.open_workbook(self.inputfile) as wb:
+            for sheetnum in range(0, wb.nsheets):
+                result = self.xls_sheet(wb.sheet_by_index(sheetnum))
+                headers[wb.sheet_by_index(sheetnum).name] = result
+        return headers
+
+    def xls_sheet(self, sheet, headerrownum=0):
         headers = {}
         rownum = headerrownum
         coltitles = []
@@ -34,7 +51,6 @@ def xls_sheet(sheet, headerrownum=0):
                 coltitle = 'empty{0}'.format(colnum)
             headers[coltitle] = [cell_type]
             coltitles.append(coltitle)
-
         for coltitle in coltitles:
             headers[coltitle] = []
         for rownum in range(1, sheet.nrows):
@@ -53,9 +69,6 @@ def xls_sheet(sheet, headerrownum=0):
                 if cell_type!="empty":
                     if not cell_type in headers[coltitles[colnum]]:
                         headers[coltitles[colnum]].append(cell_type)
-#                stderr("{} ({}) : {}".format(coltitles[colnum],
-#                        cell_type,
-#                        sheet.cell_value(rownum,colnum)))
         res = {}
         for key in headers.keys():
             if len(headers[key])==1:
@@ -93,25 +106,12 @@ if __name__ == "__main__":
     stderr(datetime.today().strftime("%H:%M:%S"))
 
     args = arguments()
-    inputfiles = args['inputfile'].split(',')
+    inputfile = args['inputfile']
     mappingfile = args['mappingfile']
     headerrow = int(args['headerrow'])
 
-    mapping = {}
- 
-    output = open(mappingfile,"w", encoding='utf-8')
-    headers = {}
-    for inputfile in inputfiles:
-        wb = xlrd.open_workbook(inputfile)
-        for sheetnum in range(0, wb.nsheets):
-            stderr("{}: {}".format(sheetnum, wb.sheet_by_index(sheetnum).name))
-            result = xls_sheet(wb.sheet_by_index(sheetnum))
-            headers[wb.sheet_by_index(sheetnum).name] = result
-    mapping = { 'mapping': headers }
-    mapping['links'] = {}
-    mapping['combine'] = {}
-    output.write(json.dumps(mapping, sort_keys=False, indent=4))
-    output.close()
+    base_mapping = MakeBaseMapping(inputfile, mappingfile)
+    mapping = base_mapping.make_mapping()
 
 #    with open(mappingfile) as f:
 #        data = json.load(f)
