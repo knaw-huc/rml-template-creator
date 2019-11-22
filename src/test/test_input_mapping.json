@@ -1,0 +1,15 @@
+{
+    "mapping": {
+        "Persons": {
+            "PE_ID": "number",
+            "Name": "string",
+            "Birthplace": "number"
+        },
+        "Places": {
+            "PL_ID": "number",
+            "Placename": "string"
+        }
+    },
+    "links": {},
+    "combine": {}
+}
