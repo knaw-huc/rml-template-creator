@@ -14,8 +14,9 @@ class MappingToRML:
         self.output = open(outputfile, "w", encoding='utf-8')
 
     def makeRML(self):
-        json_input = open(mappingfile)
-        mapping_dict = json.load(json_input)
+        mapping_dict = {}
+        with open(self.mappingfile) as json_input:
+            mapping_dict = json.load(json_input)
         self.mapping = mapping_dict['mapping']
     
         self.result = {}
@@ -26,19 +27,19 @@ class MappingToRML:
                 }
         self.result['@graph'] = []
         self.doSheets()
-    
+
     def doSheets(self):
         teller = 0
         for sheet in self.mapping.keys():
             this_sheet = {}
-            resource = "http://timbuctoo.huygens.knaw.nl/v5/data/{0}/{1}/".format(dataset,sheet)
+            resource = "http://timbuctoo.huygens.knaw.nl/v5/data/{0}/{1}/".format(self.dataset,sheet)
             this_sheet['@id'] = resource
     
             teller += 1
             this_sheet['rml:logicalSource'] = {
                     "rml:source" : {
                         "tim:rawCollectionUri" : {
-                            "@id" : rawcollectionuri + "{}".format(teller)
+                            "@id" : self.rawcollectionuri + "{}".format(teller)
                             },
                         "tim:customField": []
                         }
