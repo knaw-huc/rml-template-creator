@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-import argparse
 from datetime import datetime
 import json
 import os
@@ -27,7 +26,7 @@ class TestMakeMapping(unittest.TestCase):
         test_mapping = json.load(test_mapping_file)
         compare_file = open(comparefile)
         compare_mapping = json.load(compare_file)
-        self.assertEqual( test_mapping, compare_mapping)
+        self.assertEqual(test_mapping, compare_mapping)
         test_mapping_file.close()
         compare_file.close()
         os.remove(resultfile)
