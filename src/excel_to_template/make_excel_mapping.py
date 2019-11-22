@@ -80,11 +80,6 @@ class MakeBaseMapping:
 def stderr(text):
     sys.stderr.write("{}\n".format(text))
 
-def end_prog(code=0):
-    stderr(datetime.today().strftime("%H:%M:%S"))
-    stderr("einde")
-    sys.exit(code)
-
  
 def arguments():
     ap = argparse.ArgumentParser(description='Read lines from excelfile to make a standard mappingfile')
