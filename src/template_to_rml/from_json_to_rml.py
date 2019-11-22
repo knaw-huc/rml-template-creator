@@ -5,14 +5,78 @@ import re
 import sys
 import json
 
+class MappingToRML:
+
+    def __init__(self, mappingfile, outputfile, rawcollectionuri, dataset):
+        self.mappingfile = mappingfile
+        self.rawcollectionuri = rawcollectionuri
+        self.dataset = dataset
+        self.output = open(outputfile, "w", encoding='utf-8')
+
+    def makeRML(self):
+        json_input = open(mappingfile)
+        mapping_dict = json.load(json_input)
+        self.mapping = mapping_dict['mapping']
+    
+        self.result = {}
+        self.result['@context'] = {
+                "rr": "http://www.w3.org/ns/r2rml#",
+                "rml": "http://semweb.mmlab.be/ns/rml#",
+                "tim": "http://timbuctoo.huygens.knaw.nl/mapping#"
+                }
+        self.result['@graph'] = []
+        self.doSheets()
+    
+    def doSheets(self):
+        teller = 0
+        for sheet in self.mapping.keys():
+            this_sheet = {}
+            resource = "http://timbuctoo.huygens.knaw.nl/v5/data/{0}/{1}/".format(dataset,sheet)
+            this_sheet['@id'] = resource
+    
+            teller += 1
+            this_sheet['rml:logicalSource'] = {
+                    "rml:source" : {
+                        "tim:rawCollectionUri" : {
+                            "@id" : rawcollectionuri + "{}".format(teller)
+                            },
+                        "tim:customField": []
+                        }
+                    }
+            
+            this_sheet['rr:subjectMap'] = {}
+            this_sheet['rr:subjectMap']['rr:template'] = resource + "{persistant_id}"
+            this_sheet['rr:subjectMap']['rr:class'] =  { "@id": resource }
+            this_sheet['rr:predicateObjectMap'] = []
+    
+            for column in self.mapping[sheet].keys():
+                this_sheet['rr:predicateObjectMap'].append(self.do_column(column))
+            self.result['@graph'].append(this_sheet)
+    
+        self.output.write(json.dumps(self.result, sort_keys=False, indent=2))
+        self.output.close()
+
+    def do_column(self, column):
+        return {
+          "rr:predicate": {
+            "@id": "http://schema.org/" + column
+          },
+          "rr:objectMap": {
+            "rr:column": column,
+            "rr:datatype": {
+              "@id": "http://www.w3.org/2001/XMLSchema#string"
+            },
+            "rr:termType": {
+              "@id": "rr:Literal"
+            }
+          }
+        }
+
+# end class MappingToRML
+
+
 def stderr(text):
     sys.stderr.write("{}\n".format(text))
-
-def end_prog(code=0):
-    stderr(datetime.today().strftime("%H:%M:%S"))
-    stderr("einde")
-    sys.exit(code)
-
  
 def arguments():
     ap = argparse.ArgumentParser(description='Read mappingfile to make an rml-file')
@@ -31,77 +95,21 @@ def arguments():
     return args
 
 def start():
-    stderr("start")
-    stderr(datetime.today().strftime("%H:%M:%S"))
+    stderr("started at: {}".format(datetime.today().strftime("%H:%M:%S")))
 
 def end():
-    stderr(datetime.today().strftime("%H:%M:%S"))
-    stderr("einde")
+    stderr("stopped at: {}".format(datetime.today().strftime("%H:%M:%S")))
  
 if __name__ == "__main__":
     start()
     args = arguments()
-    inputfile = args['mappingfile']
+    mappingfile = args['mappingfile']
     outputfile = args['outputfile']
     rawcollectionuri= args['rawcollectionuri']
     dataset = args['dataset']
 
-    output = open(outputfile, "w", encoding='utf-8')
-
-    json_input = open(inputfile)
-    mapping_dict = json.load(json_input)
-    mapping = mapping_dict['mapping']
-
-    result = {}
-    result['@context'] = {
-            "rr": "http://www.w3.org/ns/r2rml#",
-            "rml": "http://semweb.mmlab.be/ns/rml#",
-            "tim": "http://timbuctoo.huygens.knaw.nl/mapping#"
-            }
-    result['@graph'] = []
-
-    teller = 0
-    for sheet in mapping.keys():
-        this_sheet = {}
-        resource = "http://timbuctoo.huygens.knaw.nl/v5/data/{0}/{1}/".format(dataset,sheet)
-        this_sheet['@id'] = resource
-
-        teller += 1
-        this_sheet['rml:logicalSource'] = {
-                "rml:source" : {
-                    "tim:rawCollectionUri" : {
-                        "@id" : rawcollectionuri + "{}".format(teller)
-                        },
-                    "tim:customField": []
-                    }
-                }
-        
-        this_sheet['rr:subjectMap'] = {}
-        this_sheet['rr:subjectMap']['rr:template'] = resource + "{persistant_id}"
-        this_sheet['rr:subjectMap']['rr:class'] =  { "@id": resource }
-        this_sheet['rr:predicateObjectMap'] = []
-
-        for key in mapping[sheet].keys():
-            this_key = {
-              "rr:predicate": {
-                "@id": "http://schema.org/" + key
-              },
-              "rr:objectMap": {
-                "rr:column": key,
-                "rr:datatype": {
-                  "@id": "http://www.w3.org/2001/XMLSchema#string"
-                },
-                "rr:termType": {
-                  "@id": "rr:Literal"
-                }
-              }
-            }
-            this_sheet['rr:predicateObjectMap'].append(this_key)
-        result['@graph'].append(this_sheet)
-
-    output.write(json.dumps(result, sort_keys=False, indent=2))
-    output.close()
+    mtr = MappingToRML(mappingfile, outputfile, rawcollectionuri, dataset)
+    mtr.makeRML()
 
     end()
-
 
