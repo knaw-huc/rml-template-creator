@@ -87,7 +87,7 @@ def end_prog(code=0):
 
  
 def arguments():
-    ap = argparse.ArgumentParser(description='Read headerline from excelfile make a standard mappingfile')
+    ap = argparse.ArgumentParser(description='Read lines from excelfile to make a standard mappingfile')
     ap.add_argument('-i', '--inputfile',
                     help="inputfile",
                     default = "20191011_manuscripts_mastersheet_CURRENT.xlsx")
@@ -111,12 +111,7 @@ if __name__ == "__main__":
     headerrow = int(args['headerrow'])
 
     base_mapping = MakeBaseMapping(inputfile, mappingfile)
-    mapping = base_mapping.make_mapping()
-
-#    with open(mappingfile) as f:
-#        data = json.load(f)
-#    for key in data.keys():
-#        stderr("{}: {}".format(key, data[key]))
+    base_mapping.make_mapping()
 
     stderr(datetime.today().strftime("%H:%M:%S"))
     stderr("einde")
