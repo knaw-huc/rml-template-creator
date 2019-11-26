@@ -16,7 +16,7 @@
         }
       },
       "rr:subjectMap": {
-        "rr:template": "http://timbuctoo.huygens.knaw.nl/v5/data/test_sheet/Persons/{persistant_id}",
+        "rr:template": "http://timbuctoo.huygens.knaw.nl/v5/data/test_sheet/Persons/{PE-ID}",
         "rr:class": {
           "@id": "http://timbuctoo.huygens.knaw.nl/v5/data/test_sheet/Persons/"
         }
@@ -24,10 +24,10 @@
       "rr:predicateObjectMap": [
         {
           "rr:predicate": {
-            "@id": "http://schema.org/PE_ID"
+            "@id": "http://schema.org/PE-ID"
           },
           "rr:objectMap": {
-            "rr:column": "PE_ID",
+            "rr:column": "PE-ID",
             "rr:datatype": {
               "@id": "http://www.w3.org/2001/XMLSchema#string"
             },
@@ -77,7 +77,7 @@
         }
       },
       "rr:subjectMap": {
-        "rr:template": "http://timbuctoo.huygens.knaw.nl/v5/data/test_sheet/Places/{persistant_id}",
+        "rr:template": "http://timbuctoo.huygens.knaw.nl/v5/data/test_sheet/Places/{PL-ID}",
         "rr:class": {
           "@id": "http://timbuctoo.huygens.knaw.nl/v5/data/test_sheet/Places/"
         }
@@ -85,10 +85,10 @@
       "rr:predicateObjectMap": [
         {
           "rr:predicate": {
-            "@id": "http://schema.org/PL_ID"
+            "@id": "http://schema.org/PL-ID"
           },
           "rr:objectMap": {
-            "rr:column": "PL_ID",
+            "rr:column": "PL-ID",
             "rr:datatype": {
               "@id": "http://www.w3.org/2001/XMLSchema#string"
             },

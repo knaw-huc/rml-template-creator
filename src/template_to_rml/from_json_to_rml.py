@@ -18,6 +18,9 @@ class MappingToRML:
         with open(self.mappingfile) as json_input:
             mapping_dict = json.load(json_input)
         self.mapping = mapping_dict['mapping']
+        self.sheet_ids = mapping_dict['ids']
+
+        # mapping_dict['names_titles']
     
         self.result = {}
         self.result['@context'] = {
@@ -46,7 +49,7 @@ class MappingToRML:
                     }
             
             this_sheet['rr:subjectMap'] = {}
-            this_sheet['rr:subjectMap']['rr:template'] = resource + "{persistant_id}"
+            this_sheet['rr:subjectMap']['rr:template'] = resource + "{" + self.sheet_ids[sheet] + "}"
             this_sheet['rr:subjectMap']['rr:class'] =  { "@id": resource }
             this_sheet['rr:predicateObjectMap'] = []
     
