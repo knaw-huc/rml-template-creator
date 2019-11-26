@@ -46,7 +46,7 @@ class MakeBaseMapping:
                 cell_type = "string"
             coltitle = ''
             if sheet.cell_value(headerrownum, colnum) != '':
-                coltitle = re.sub(r'[ -/]+','_',sheet.cell_value(headerrownum,colnum)).strip('_')
+                coltitle = re.sub(r'[ -/]+','-',sheet.cell_value(headerrownum,colnum)).strip('-')
             else:
                 coltitle = 'empty{0}'.format(colnum)
             headers[coltitle] = [cell_type]
