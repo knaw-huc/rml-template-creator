@@ -15,8 +15,9 @@ class MakeBaseMapping:
         self.mappingfile = mappingfile
 
     def make_mapping(self):
-        headers = self.read_sheets()
+        headers,ids = self.read_sheets()
         mapping = { 'mapping': headers }
+        mapping['ids'] = ids
         mapping['links'] = {}
         mapping['combine'] = {}
         with open(self.mappingfile,"w", encoding='utf-8') as outputfile:
@@ -24,11 +25,14 @@ class MakeBaseMapping:
 
     def read_sheets(self):
         headers = {}
+        ids = {}
         with xlrd.open_workbook(self.inputfile) as wb:
             for sheetnum in range(0, wb.nsheets):
-                result = self.xls_sheet(wb.sheet_by_index(sheetnum))
-                headers[wb.sheet_by_index(sheetnum).name] = result
-        return headers
+                res_headers,res_idcol = self.xls_sheet(wb.sheet_by_index(sheetnum))
+                sheetname = wb.sheet_by_index(sheetnum).name 
+                headers[sheetname] = res_headers
+                ids[sheetname] = res_idcol
+        return headers,ids
 
     def xls_sheet(self, sheet, headerrownum=0):
         headers = {}
@@ -75,7 +79,7 @@ class MakeBaseMapping:
                 res[key] = headers[key][0]
             else:
                 res[key] = "string"
-        return res
+        return res,coltitles[0]
 
 def stderr(text):
     sys.stderr.write("{}\n".format(text))

@@ -10,7 +10,11 @@
             "Placename": "string"
         }
     },
-    "links": {
+    "ids": {
+        "Persons": "PE-ID",
+        "Places": "PL-ID"
+    },
+     "links": {
     },
     "combine": {}
 }
