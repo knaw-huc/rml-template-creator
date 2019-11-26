@@ -1,12 +1,12 @@
 {
     "mapping": {
         "Persons": {
-            "PE_ID": "number",
+            "PE-ID": "number",
             "Name": "string",
             "Birthplace": "number"
         },
         "Places": {
-            "PL_ID": "number",
+            "PL-ID": "number",
             "Placename": "string"
         }
     },
