@@ -17,15 +17,9 @@ class MappingToRML:
         mapping_dict = {}
         with open(self.mappingfile) as json_input:
             mapping_dict = json.load(json_input)
-        self.mapping = {}
-        if 'mapping' in mapping_dict:
-            self.mapping = mapping_dict['mapping']
-        self.sheet_ids = {}
-        if 'ids' in mapping_dict:
-            self.sheet_ids = mapping_dict['ids']
-        self.links = {}
-        if 'links' in mapping_dict:
-            self.links = self.doLinks(mapping_dict['links'])
+        self.mapping = mapping_dict.get('mapping', {})
+        self.sheet_ids = mapping_dict.get('ids', {})
+        self.links = self.doLinks(mapping_dict.get('links', {}))
 
         # mapping_dict['names_titles']
     
@@ -55,9 +49,8 @@ class MappingToRML:
         teller = 0
         for sheet in self.mapping.keys():
             this_sheet = {}
-            resource = "http://timbuctoo.huygens.knaw.nl/v5/data/{0}/{1}/".format(self.dataset,sheet)
-            this_sheet['@id'] = resource
-    
+            self.resource = "http://timbuctoo.huygens.knaw.nl/v5/data/{0}/{1}/".format(self.dataset,sheet)
+            this_sheet['@id'] = self.resource
             teller += 1
             this_sheet['rml:logicalSource'] = {
                     "rml:source" : {
@@ -69,32 +62,45 @@ class MappingToRML:
                     }
             
             this_sheet['rr:subjectMap'] = {}
-            this_sheet['rr:subjectMap']['rr:template'] = resource + "{" + self.sheet_ids.get(sheet,"persistent_id") + "}"
-            this_sheet['rr:subjectMap']['rr:class'] =  { "@id": resource }
+            this_sheet['rr:subjectMap']['rr:template'] = self.resource + "{" + self.sheet_ids.get(sheet,"persistent_id") + "}"
+            this_sheet['rr:subjectMap']['rr:class'] =  { "@id": self.resource }
             this_sheet['rr:predicateObjectMap'] = []
     
             for column in self.mapping[sheet].keys():
-                this_sheet['rr:predicateObjectMap'].append(self.do_column(column))
+                this_sheet['rr:predicateObjectMap'].append(self.do_column(sheet, column))
             self.result['@graph'].append(this_sheet)
     
         self.output.write(json.dumps(self.result, sort_keys=False, indent=2))
         self.output.close()
 
-    def do_column(self, column):
-        return {
-          "rr:predicate": {
-            "@id": "http://schema.org/" + column
-          },
-          "rr:objectMap": {
-            "rr:column": column,
-            "rr:datatype": {
-              "@id": "http://www.w3.org/2001/XMLSchema#string"
-            },
-            "rr:termType": {
-              "@id": "rr:Literal"
-            }
-          }
-        }
+    def do_column(self, sheet, column):
+        result = {}
+        result['rr:predicate'] = {
+                "@id": "http://schema.org/" + column
+                }
+        if sheet in self.links:
+            if column in self.links[sheet]:
+                tar_sh = list(self.links[sheet][column].keys())[0]
+                tar_col = self.links[sheet][column][tar_sh]
+                result['rr:objectMap'] = {}
+                result['rr:objectMap']['rr:parentTriplesMap'] = {
+                        "@id": self.resource.replace(sheet, tar_sh)
+                        }
+                result['rr:objectMap']['rr:joinCondition'] = {
+                        "rr:child": column,
+                        "rr:parent": tar_col
+                        }
+                return result
+        result['rr:objectMap'] = {
+                "rr:column": column,
+                "rr:datatype": {
+                    "@id": "http://www.w3.org/2001/XMLSchema#string"
+                    },
+                "rr:termType": {
+                    "@id": "rr:Literal"
+                    }
+                }
+        return result
 
 # end class MappingToRML
 

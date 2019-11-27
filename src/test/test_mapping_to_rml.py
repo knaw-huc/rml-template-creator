@@ -33,6 +33,24 @@ class TestMakeRML(unittest.TestCase):
         generated_file.close()
         os.remove(outputfile)
 
+    def test_make_rml_with_link(self):
+        self.maxDiff = None
+        mappingfile = 'test_mapping_with_link.json'
+        outputfile = 'this_test_rml_with_link.json'
+        rawcollectionuri= 'https://data.huygens.knaw.nl/rdf/datasets/u1234567890/test_sheet/rawData/be827d-af8ctest_sheet_xlsx/collections/'
+        dataset = 'test_sheet'
+        mtr = MappingToRML(mappingfile, outputfile, rawcollectionuri, dataset)
+        mtr.makeRML()
+        expected_resultfile = 'test_expected_rml_with_link.json'
+        compare_file = open(expected_resultfile)
+        generated_file = open(outputfile)
+        expected_rml = json.load(compare_file)
+        generated_rml = json.load(generated_file)
+        self.assertEqual(generated_rml, expected_rml)
+        compare_file.close()
+        generated_file.close()
+        os.remove(outputfile)
+
     def tearDown(self):
         self.stderr("stopped at: {}".format(datetime.today().strftime("%H:%M:%S")))
 
