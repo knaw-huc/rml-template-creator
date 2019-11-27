@@ -17,8 +17,15 @@ class MappingToRML:
         mapping_dict = {}
         with open(self.mappingfile) as json_input:
             mapping_dict = json.load(json_input)
-        self.mapping = mapping_dict['mapping']
-        self.sheet_ids = mapping_dict['ids']
+        self.mapping = {}
+        if 'mapping' in mapping_dict:
+            self.mapping = mapping_dict['mapping']
+        self.sheet_ids = {}
+        if 'ids' in mapping_dict:
+            self.sheet_ids = mapping_dict['ids']
+        self.links = {}
+        if 'links' in mapping_dict:
+            self.links = self.doLinks(mapping_dict['links'])
 
         # mapping_dict['names_titles']
     
@@ -30,6 +37,19 @@ class MappingToRML:
                 }
         self.result['@graph'] = []
         self.doSheets()
+
+    def doLinks(self, links):
+        result = {}
+        for key in links.keys():
+            sheet,column = re.split(r'\.', key, 1)
+            if sheet in result:
+                target_sh,target_col = re.split(r'\.', links[key], 1)
+                result[sheet][column] = { target_sh: target_col }
+            else:
+                result[sheet] = {}
+                target_sh,target_col = re.split(r'\.', links[key], 1)
+                result[sheet][column] = { target_sh: target_col }
+        return result
 
     def doSheets(self):
         teller = 0
@@ -49,7 +69,7 @@ class MappingToRML:
                     }
             
             this_sheet['rr:subjectMap'] = {}
-            this_sheet['rr:subjectMap']['rr:template'] = resource + "{" + self.sheet_ids[sheet] + "}"
+            this_sheet['rr:subjectMap']['rr:template'] = resource + "{" + self.sheet_ids.get(sheet,"persistent_id") + "}"
             this_sheet['rr:subjectMap']['rr:class'] =  { "@id": resource }
             this_sheet['rr:predicateObjectMap'] = []
     
