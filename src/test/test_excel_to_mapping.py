@@ -18,8 +18,8 @@ class TestMakeMapping(unittest.TestCase):
 
     def test_mapping(self):
         inputfile = "test_sheet.xlsx"
-        comparefile = "test_sheet_mapping.json"
-        resultfile = "test_mapping.json"
+        comparefile = "test_expected_mapping.json"
+        resultfile = "test_generated_mapping.json"
         mbm = MakeBaseMapping(inputfile, resultfile)
         mbm.make_mapping()
         test_mapping_file = open(resultfile, 'r')

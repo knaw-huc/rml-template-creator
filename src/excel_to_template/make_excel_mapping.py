@@ -18,6 +18,7 @@ class MakeBaseMapping:
         headers,ids = self.read_sheets()
         mapping = { 'mapping': headers }
         mapping['ids'] = ids
+        mapping['names_titles'] = {}
         mapping['links'] = {}
         mapping['combine'] = {}
         with open(self.mappingfile,"w", encoding='utf-8') as outputfile:
