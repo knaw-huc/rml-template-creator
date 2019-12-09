@@ -22,6 +22,7 @@ As an example we take an xlsx containing two tabs:
 * tab Persons, with columns PE-ID, Name, Birthplace
 * tab Places, with columns, PL-ID, Placename
 This will result in a json file like:
+```
     {
         "mapping": {
             "Persons": {
@@ -42,15 +43,18 @@ This will result in a json file like:
         "links": {},
         "combine": {}
     }
+```
 'ids' indicates the column of each table which is the unique identifier.
 
 `names_title` indicates the column of each table which is to be used as this recordtypes `schema:name`.
 
 `links` gives you the posibility to make links between columns, both on the same tab and between tabs.
 Example:
+```
       "links": {
         "Persons.Birthplace": "Places.PL-ID"
       },
+```
 links the column Birthplace on tab Persons to the column PL_ID on tab Places. In the endresult, after uploading to timbuctoo, column Birthplace will show a link to the Places table.
 
 `combine` ia not yet implemented.
