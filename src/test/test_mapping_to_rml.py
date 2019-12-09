@@ -14,7 +14,7 @@ import tracemalloc
 
 class TestMakeRML(unittest.TestCase):
     def setUp(self):
-        self.stderr("started at: {}".format(datetime.today().strftime("%H:%M:%S")))
+        pass
 
     def test_make_rml(self):
         mappingfile = 'test_input_mapping.json'
@@ -51,14 +51,34 @@ class TestMakeRML(unittest.TestCase):
         generated_file.close()
         os.remove(outputfile)
 
-    def tearDown(self):
-        self.stderr("stopped at: {}".format(datetime.today().strftime("%H:%M:%S")))
+    def test_make_rml_with_names(self):
+        self.maxDiff = None
+        mappingfile = 'test_input_mapping_with_names.json'
+        outputfile = 'this_test_rml_with_names.json'
+        rawcollectionuri= 'https://data.huygens.knaw.nl/rdf/datasets/u1234567890/test_sheet/rawData/be827d-af8ctest_sheet_xlsx/collections/'
+        dataset = 'test_sheet'
+        mtr = MappingToRML(mappingfile, outputfile, rawcollectionuri, dataset)
+        mtr.makeRML()
+        expected_resultfile = 'test_expected_rml_with_titles.json'
+        compare_file = open(expected_resultfile)
+        generated_file = open(outputfile)
+        expected_rml = json.load(compare_file)
+        generated_rml = json.load(generated_file)
+        self.assertEqual(generated_rml, expected_rml)
+        compare_file.close()
+        generated_file.close()
+        os.remove(outputfile)
 
-    def stderr(self, text):
-        sys.stderr.write("{}\n".format(text))
+    def tearDown(self):
+        pass
+
+def stderr(text):
+    sys.stderr.write("{}\n".format(text))
 
  
 if __name__ == "__main__":
+    stderr("started at: {}".format(datetime.today().strftime("%H:%M:%S")))
     tracemalloc.start()
     unittest.main()
+    stderr("stopped at: {}".format(datetime.today().strftime("%H:%M:%S")))
 

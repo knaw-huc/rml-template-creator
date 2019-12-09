@@ -44,7 +44,7 @@ This will result in a json file like:
     }
 'ids' indicates the column of each table which is the unique identifier.
 
-`names_title` is not yet implemented.
+`names_title` indicates the column of each table which is to be used as this recordtypes `schema:name`.
 
 `links` gives you the posibility to make links between columns, both on the same tab and between tabs.
 Example:

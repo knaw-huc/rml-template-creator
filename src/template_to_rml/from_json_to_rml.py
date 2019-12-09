@@ -20,9 +20,7 @@ class MappingToRML:
         self.mapping = mapping_dict.get('mapping', {})
         self.sheet_ids = mapping_dict.get('ids', {})
         self.links = self.doLinks(mapping_dict.get('links', {}))
-
-        # mapping_dict['names_titles']
-    
+        self.names_titles = mapping_dict.get('names_titles',{})
         self.result = {}
         self.result['@context'] = {
                 "rr": "http://www.w3.org/ns/r2rml#",
@@ -67,6 +65,8 @@ class MappingToRML:
             this_sheet['rr:predicateObjectMap'] = []
     
             for column in self.mapping[sheet].keys():
+                if column in self.names_titles.get(sheet,{}):
+                    this_sheet['rr:predicateObjectMap'].append(self.do_make_title_col(sheet, column))
                 this_sheet['rr:predicateObjectMap'].append(self.do_column(sheet, column))
             self.result['@graph'].append(this_sheet)
     
@@ -91,6 +91,22 @@ class MappingToRML:
                         "rr:parent": tar_col
                         }
                 return result
+        result['rr:objectMap'] = {
+                "rr:column": column,
+                "rr:datatype": {
+                    "@id": "http://www.w3.org/2001/XMLSchema#string"
+                    },
+                "rr:termType": {
+                    "@id": "rr:Literal"
+                    }
+                }
+        return result
+
+    def do_make_title_col(self, sheet, column):
+        result = {}
+        result['rr:predicate'] = {
+                "@id": "http://schema.org/name"
+                }
         result['rr:objectMap'] = {
                 "rr:column": column,
                 "rr:datatype": {
