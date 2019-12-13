@@ -21,6 +21,7 @@ class MappingToRML:
         self.sheet_ids = mapping_dict.get('ids', {})
         self.links = self.doLinks(mapping_dict.get('links', {}))
         self.names_titles = mapping_dict.get('names_titles',{})
+        self.combine = mapping_dict.get('combine',{})
         self.result = {}
         self.result['@context'] = {
                 "rr": "http://www.w3.org/ns/r2rml#",
@@ -43,9 +44,46 @@ class MappingToRML:
                 result[sheet][column] = { target_sh: target_col }
         return result
 
+    def doCombine(self, this_sheet, combine):
+        stderr('verwerk combine')
+        object_maps = []
+        for key in combine.keys():
+            # it seems, combining fields only works wenn using datatype 'person-name'
+            object_maps.append({ "rr:objectMap": {
+                "rr:column": key,
+                "rr:datatype": {
+                  "@id": "http://timbuctoo.huygens.knaw.nl/static/v5/datatype/person-name"
+                },
+                "rr:termType": {
+                  "@id": "rr:Literal"
+                }
+              }
+            })
+            new_combine = {"tim:name":key}
+            expression = combine[key]['join'].join(combine[key]['fields'])
+            expression = r'"{\"components\":['
+            first = True
+            components = []
+            for field in combine[key]['fields']:
+                stderr(field)
+                components.append({ "type": '"{}"'.format(field.upper()),
+                                    "value": '"Json:stringify(v.{})"'.format(field) })
+                if first:
+                    first = False
+                else:
+                    expression = expression + ','
+                expression = expression + r'{\"type\":\"' + field.upper() + r'\",\"value\":" + '
+                expression = expression + " Json:stringify(v." + field + r') + "}'
+            expression = expression + r']}"'
+            new_combine["tim:expression"] = expression
+            this_sheet.append(new_combine)
+        return object_maps
+
     def doSheets(self):
         teller = 0
         for sheet in self.mapping.keys():
+            combine = self.combine.get(sheet,{})
+            stderr(json.dumps(combine, sort_keys=False, indent=2))
             this_sheet = {}
             self.resource = "http://timbuctoo.huygens.knaw.nl/v5/data/{0}/{1}/".format(self.dataset,sheet)
             this_sheet['@id'] = self.resource
@@ -63,7 +101,12 @@ class MappingToRML:
             this_sheet['rr:subjectMap']['rr:template'] = self.resource + "{" + self.sheet_ids.get(sheet,"persistent_id") + "}"
             this_sheet['rr:subjectMap']['rr:class'] =  { "@id": self.resource }
             this_sheet['rr:predicateObjectMap'] = []
-    
+
+            if combine:
+                object_maps = self.doCombine(this_sheet['rml:logicalSource']['rml:source']['tim:customField'], combine)
+                for obj_map in object_maps:
+                    this_sheet['rr:predicateObjectMap'].append(obj_map)
+
             for column in self.mapping[sheet].keys():
                 if column in self.names_titles.get(sheet,{}):
                     this_sheet['rr:predicateObjectMap'].append(self.do_make_title_col(sheet, column))
