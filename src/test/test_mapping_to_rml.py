@@ -69,6 +69,24 @@ class TestMakeRML(unittest.TestCase):
         generated_file.close()
         os.remove(outputfile)
 
+    def test_combine(self):
+        outputfile = 'this_test_combine.json'
+        mtr = MappingToRML(None, outputfile, "", "")
+        sheet = []
+        combine = {
+                    "birthDate": {
+                        "join": "-",
+                        "fields": [ "birth_year", "birth_month", "birth_day"]
+                    }
+                }
+        result = mtr.doCombine(sheet, combine)
+        expected_result= [{'rr:objectMap': {'rr:column': 'birthDate', 'rr:datatype': {'@id': 'http://timbuctoo.huygens.knaw.nl/static/v5/datatype/person-name'}, 'rr:termType': {'@id': 'rr:Literal'}}}]
+        self.assertEqual(result, expected_result)
+        expected_sheet = [{'tim:name': 'birthDate', 'tim:expression': '"{\\"components\\":[{\\"type\\":\\"BIRTH_YEAR\\",\\"value\\":" +  Json:stringify(v.birth_year) + "},{\\"type\\":\\"BIRTH_MONTH\\",\\"value\\":" +  Json:stringify(v.birth_month) + "},{\\"type\\":\\"BIRTH_DAY\\",\\"value\\":" +  Json:stringify(v.birth_day) + "}]}"'}]
+        self.assertEqual(sheet, expected_sheet)
+        mtr.output.close()
+        os.remove(outputfile)
+
     def tearDown(self):
         pass
 
