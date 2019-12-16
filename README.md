@@ -57,8 +57,18 @@ Example:
 ```
 links the column Birthplace on tab Persons to the column PL_ID on tab Places. In the endresult, after uploading to timbuctoo, column Birthplace will show a link to the Places table.
 
-`combine` ia not yet implemented.
-
+`combine` gives you the possibility to combine several columns to a single column.
+Example:
+```
+    "combine": {
+	"Persons": {
+	    "birthDate": {
+		"fields": [ "birth_year", "birth_month", "birth_day"]
+	    }
+	}
+    }
+```
+combines `birth_year`, `birth_month`, `birth_day` to a new field `birthDate` (in the same order as in the array after `"fields"`).
 
 ## generate an rml-mapping
 
