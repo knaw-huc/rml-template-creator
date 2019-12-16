@@ -68,7 +68,7 @@ Example:
 	}
     }
 ```
-combines `birth_year`, `birth_month`, `birth_day` on the `Perons` tab to a new field `birthDate` (in the same order as in the array after `"fields"`).
+combines `birth_year`, `birth_month`, `birth_day` on the `Persons` tab to a new field `birthDate` (in the same order as in the array after `"fields"`).
 
 ## generate an rml-mapping
 
