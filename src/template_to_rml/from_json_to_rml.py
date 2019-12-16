@@ -45,7 +45,6 @@ class MappingToRML:
         return result
 
     def doCombine(self, this_sheet, combine):
-        stderr('verwerk combine')
         object_maps = []
         for key in combine.keys():
             # it seems, combining fields only works wenn using datatype 'person-name'
@@ -65,7 +64,6 @@ class MappingToRML:
             first = True
             components = []
             for field in combine[key]['fields']:
-                stderr(field)
                 components.append({ "type": '"{}"'.format(field.upper()),
                                     "value": '"Json:stringify(v.{})"'.format(field) })
                 if first:
@@ -83,7 +81,6 @@ class MappingToRML:
         teller = 0
         for sheet in self.mapping.keys():
             combine = self.combine.get(sheet,{})
-            stderr(json.dumps(combine, sort_keys=False, indent=2))
             this_sheet = {}
             self.resource = "http://timbuctoo.huygens.knaw.nl/v5/data/{0}/{1}/".format(self.dataset,sheet)
             this_sheet['@id'] = self.resource
