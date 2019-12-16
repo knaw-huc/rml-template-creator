@@ -19,8 +19,8 @@ There should always be a header row! if your xlsx has no header row, add it firs
 ## Adjusting the mapping
 
 As an example we take an xlsx containing two tabs:
-* tab Persons, with columns PE-ID, Name, Birthplace
-* tab Places, with columns, PL-ID, Placename
+* tab `Persons`, with columns `PE-ID, Name, Birthplace`
+* tab `Places`, with columns, `PL-ID, Placename`
 This will result in a json file like:
 ```
     {
@@ -55,7 +55,7 @@ Example:
         "Persons.Birthplace": "Places.PL-ID"
       },
 ```
-links the column Birthplace on tab Persons to the column PL_ID on tab Places. In the endresult, after uploading to timbuctoo, column Birthplace will show a link to the Places table.
+links the column `Birthplace` on the `Persons` tab to the column `PL_ID` on the `Places` tab. In the endresult, after uploading to timbuctoo, column `Birthplace` will show a link to the `Places` table.
 
 `combine` gives you the possibility to combine several columns to a single column.
 Example:
@@ -68,7 +68,7 @@ Example:
 	}
     }
 ```
-combines `birth_year`, `birth_month`, `birth_day` to a new field `birthDate` (in the same order as in the array after `"fields"`).
+combines `birth_year`, `birth_month`, `birth_day` on the `Perons` tab to a new field `birthDate` (in the same order as in the array after `"fields"`).
 
 ## generate an rml-mapping
 
