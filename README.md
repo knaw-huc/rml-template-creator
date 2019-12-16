@@ -83,3 +83,8 @@ The output (`-o`) is a json-ld file; the mapping file (`-m`) is what you made in
 `-r` is the (generated) uri the dataset got after uploading it to timbuctoo. Find out what it is using graphQL (see timbuctoo documentation).
 
 With  a `curl` command you can upload your json-ld. The amount of data will determine  how long it takes before you see the result.
+
+Example curl command:
+```
+curl --header "Content-type: application/ld+json" --header "Authorization: fake" --data "@rml_mapping.json" http://localhost:8080/v5/u33707283d426f900d4d33707283d426f900d4d0d/mappingdemo/rml
+```
