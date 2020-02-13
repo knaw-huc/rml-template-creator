@@ -4,6 +4,10 @@ Two script are provided to make it a bit simpler to create a rml-template for an
 - `make_excel_mapping.py` (in `src/excel_to_template`)
 - `from_json_to_rml.py` (in `src/template_to_rml`)
 
+The scripts work on python3. To make sure you have the right modules you can use:
+
+`pip install -r requirements.txt`
+
 ## generate a simple mapping
 
 `usage: make_excel_mapping.py [-h] [-i INPUTFILE] [-m MAPPINGFILE] [-r HEADERROW]`
